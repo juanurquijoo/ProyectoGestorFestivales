@@ -123,7 +123,19 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="PruebaProyecto.cpp" />
+    <ClCompile Include="Artista.cpp" />
+    <ClCompile Include="Escenario.cpp" />
+    <ClCompile Include="Asistente.cpp" />
+    <ClCompile Include="Concierto.cpp" />
+    <ClCompile Include="GestorFestival.cpp" />
+    <ClCompile Include="main.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Artista.hpp" />
+    <ClInclude Include="Escenario.hpp" />
+    <ClInclude Include="Asistente.hpp" />
+    <ClInclude Include="Concierto.hpp" />
+    <ClInclude Include="GestorFestival.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

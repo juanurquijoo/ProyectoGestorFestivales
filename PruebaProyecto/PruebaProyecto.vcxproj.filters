@@ -13,10 +13,48 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="include">
+      <UniqueIdentifier>{d8c0e80e-771b-417e-b0f5-91aa3daa2f3a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src">
+      <UniqueIdentifier>{72d8e056-2bba-459b-9100-9d17aac7d98d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="PruebaProyecto.cpp">
+    <ClCompile Include="Artista.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="Escenario.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="Asistente.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="Concierto.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="GestorFestival.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="main.cpp">
       <Filter>Archivos de origen</Filter>
     </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Artista.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="Escenario.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="Asistente.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="Concierto.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="GestorFestival.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
