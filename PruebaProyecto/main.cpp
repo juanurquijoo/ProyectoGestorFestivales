@@ -2,7 +2,15 @@
 #include <limits>
 #include "GestorFestival.hpp"
 using namespace std;
-// hl
+/*
+- El Proyecto es un gestor de festivales de musica, permite hacer lo siguiente:
+    1. Resgistrar artistas, escenarios y asistentes.
+    2. Programar conciertos asignando artista + escenario en un dia.
+    3. Evitar incoherencias (un artista no puede tocar dos veces el mismo dia).
+    4. Listar artistas/escenarios/agenda.
+    5. Guardar los datos a disco y cargar despues.
+    6. Interactuar desde un menu en consola con control basico de errores.
+*/
 int leerInt(const char* msg) {
     cout << msg;
     int x;
