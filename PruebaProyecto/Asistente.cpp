@@ -2,10 +2,12 @@
 #include <iostream>
 using namespace std;
 
+// Constructor
 Asistente::Asistente(int id, string nombre, int edad, string tipoEntrada, bool estudiante, bool pagada)
     : id(id), nombre(nombre), edad(edad), tipoEntrada(tipoEntrada), estudiante(estudiante), pagada(pagada) {
 }
 
+// Metodo para mostrar info de un asistente
 void Asistente::mostrarInfo() const {
     cout << "Asistente: " << nombre
         << " | Edad: " << edad
@@ -15,6 +17,7 @@ void Asistente::mostrarInfo() const {
         << endl;
 }
 
+// Metodo que calcula y devuelve el precio total de la entrada
 double Asistente::calcularPrecio() const {
     double precio = 0.0;
     if (tipoEntrada == "Dia") precio = 50.0;
@@ -25,6 +28,7 @@ double Asistente::calcularPrecio() const {
     return precio;
 }
 
+// Getters
 int Asistente::getId() const { return id; }
 string Asistente::getNombre() const { return nombre; }
 bool Asistente::getPagada() const { return pagada; }
