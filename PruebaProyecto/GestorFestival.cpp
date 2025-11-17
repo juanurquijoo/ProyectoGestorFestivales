@@ -6,7 +6,7 @@
 #include <algorithm>
 using namespace std;
 
-// Funcion libre para componer rutas de ficheros.
+// Funcion libre para componer rutas de ficheros
 static string joinPath(const string& dir, const string& name) {
 #ifdef _WIN32
     if (dir.empty() || dir == ".") return name;
