@@ -17,6 +17,7 @@ int leerInt(const char* msg) {
     while (!(cin >> x)) { cin.clear(); cin.ignore(numeric_limits<streamsize>::max(), '\n'); cout << "valor invalido: "; }
     return x;
 }
+
 string leerStr(const char* msg) {
     cout << msg;
     string s; getline(cin >> ws, s); return s;
