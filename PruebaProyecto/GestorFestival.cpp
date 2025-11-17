@@ -5,6 +5,7 @@
 #include <memory>
 #include <algorithm>
 #include <filesystem>
+#include <stdexcept>   
 
 using namespace std;
 
@@ -190,137 +191,193 @@ void GestorFestival::listarAsistentes() const {
 
 // ---------- persistencia (metodo para guardar los datos) ----------
 bool GestorFestival::guardar(const string& dir) const {
-    filesystem::create_directories(dir);
+    try {
+        filesystem::create_directories(dir);
 
-    ofstream fa(joinPath(dir, "artistas.txt"));
-    ofstream fe(joinPath(dir, "escenarios.txt"));
-    ofstream fs(joinPath(dir, "asistentes.txt"));
-    ofstream fg(joinPath(dir, "agenda.txt"));
-    if (!fa || !fe || !fs || !fg)
-        throw runtime_error("No se pudieron abrir los archivos para escritura");
+        ofstream fa(joinPath(dir, "artistas.txt"));
+        ofstream fe(joinPath(dir, "escenarios.txt"));
+        ofstream fs(joinPath(dir, "asistentes.txt"));
+        ofstream fg(joinPath(dir, "agenda.txt"));
 
-    // artistas: id;nombre;genero;duracion;demanda
-    for (const auto& ptr : artistas) {
-        const auto& a = *ptr;
-        fa << a.getId() << ';' << a.getNombre() << ';'
-            << a.getGenero() << ';' << a.getDuracion() << ';'
-            << a.getDemanda() << '\n';
-    }
+        if (!fa || !fe || !fs || !fg)
+            throw runtime_error("No se pudieron abrir los archivos para escritura");
 
-    // escenarios: id;nombre;aforo
-    for (const auto& ptr : escenarios) {
-        const auto& e = *ptr;
-        fe << e.getId() << ';' << e.getNombre() << ';'
-            << e.getAforoMaximo() << '\n';
-    }
-
-    // asistentes: id;nombre;edad;tipo;estudiante;pagada
-    for (const auto& ptr : asistentes) {
-        const auto& s = *ptr;
-        fs << s.getId() << ';' << s.getNombre() << ';'
-            << 0 << ';'            // edad placeholder si no tienes getter
-            << "Abono3" << ';'     // tipo placeholder
-            << 0 << ';'            // estudiante placeholder
-            << (s.getPagada() ? 1 : 0) << '\n';
-    }
-
-    // agenda: cabecera y filas
-    fg << dias << ';' << getNumEscenarios() << '\n';
-    for (int d = 0; d < dias; ++d) {
-        for (int e = 0; e < getNumEscenarios(); ++e) {
-            const Concierto& c = agenda[idxAgenda(d, e)];
-            int idEsc = (e < (int)escenarios.size() ? escenarios[e]->getId() : e);
-            int idArt = (c.esValido() && c.getArtista()) ? c.getArtista()->getId() : -1;
-            fg << d << ';' << idEsc << ';' << idArt << ';' << (c.esValido() ? 1 : 0) << '\n';
+        // artistas: id;nombre;genero;duracion;demanda
+        for (const auto& ptr : artistas) {
+            const auto& a = *ptr;
+            fa << a.getId() << ';' << a.getNombre() << ';'
+                << a.getGenero() << ';' << a.getDuracion() << ';'
+                << a.getDemanda() << '\n';
         }
-    }
 
-    cout << "Datos guardados correctamente en carpeta: " << dir << endl;
-    return true;
+        // escenarios: id;nombre;aforo
+        for (const auto& ptr : escenarios) {
+            const auto& e = *ptr;
+            fe << e.getId() << ';' << e.getNombre() << ';'
+                << e.getAforoMaximo() << '\n';
+        }
+
+        // asistentes: id;nombre;edad;tipo;estudiante;pagada
+        for (const auto& ptr : asistentes) {
+            const auto& s = *ptr;
+            fs << s.getId() << ';' << s.getNombre() << ';'
+                << 0 << ';'            // edad placeholder si no tienes getter
+                << "Abono3" << ';'     // tipo placeholder
+                << 0 << ';'            // estudiante placeholder
+                << (s.getPagada() ? 1 : 0) << '\n';
+        }
+
+        // agenda: cabecera y filas
+        fg << dias << ';' << getNumEscenarios() << '\n';
+        for (int d = 0; d < dias; ++d) {
+            for (int e = 0; e < getNumEscenarios(); ++e) {
+                const Concierto& c = agenda[idxAgenda(d, e)];
+                int idEsc = (e < (int)escenarios.size() ? escenarios[e]->getId() : e);
+                int idArt = (c.esValido() && c.getArtista()) ? c.getArtista()->getId() : -1;
+                fg << d << ';' << idEsc << ';' << idArt << ';'
+                    << (c.esValido() ? 1 : 0) << '\n';
+            }
+        }
+
+        cout << "Datos guardados correctamente en carpeta: " << dir << endl;
+        return true;
+    }
+    catch (const std::exception& ex) {
+        cerr << "Error al guardar datos del festival: " << ex.what() << '\n';
+        throw; // se relanza para que main (u otro) pueda capturarlo
+    }
 }
 
 // Metodo encargado de cargar los datos
 bool GestorFestival::cargar(const string& dir) {
-    filesystem::create_directories(dir);
+    try {
+        filesystem::create_directories(dir);
 
-    ifstream fa(joinPath(dir, "artistas.txt"));
-    ifstream fe(joinPath(dir, "escenarios.txt"));
-    ifstream fs(joinPath(dir, "asistentes.txt"));
-    ifstream fg(joinPath(dir, "agenda.txt"));
-    if (!fa || !fe || !fs || !fg)
-        throw runtime_error("No se pudieron abrir los archivos para lectura");
+        ifstream fa(joinPath(dir, "artistas.txt"));
+        ifstream fe(joinPath(dir, "escenarios.txt"));
+        ifstream fs(joinPath(dir, "asistentes.txt"));
+        ifstream fg(joinPath(dir, "agenda.txt"));
+        if (!fa || !fe || !fs || !fg)
+            throw runtime_error("No se pudieron abrir los archivos para lectura");
 
-    artistas.clear();
-    escenarios.clear();
-    asistentes.clear();
-    agenda.clear();
+        artistas.clear();
+        escenarios.clear();
+        asistentes.clear();
+        agenda.clear();
 
-    string lin, tok;
+        string lin, tok;
 
-    // escenarios
-    while (getline(fe, lin)) {
-        if (lin.empty()) continue;
-        stringstream ss(lin);
-        string nom; int id, af;
-        getline(ss, tok, ';'); id = stoi(tok);
-        getline(ss, nom, ';');
-        getline(ss, tok, ';'); af = stoi(tok);
-        escenarios.push_back(make_unique<Escenario>(id, nom, af));
-    }
-
-    // artistas
-    while (getline(fa, lin)) {
-        if (lin.empty()) continue;
-        stringstream ss(lin);
-        string nom, gen; int id, dem; double dur;
-        getline(ss, tok, ';'); id = stoi(tok);
-        getline(ss, nom, ';');
-        getline(ss, gen, ';');
-        getline(ss, tok, ';'); dur = stod(tok);
-        getline(ss, tok, ';'); dem = stoi(tok);
-        artistas.push_back(make_unique<Artista>(id, nom, gen, dur, dem));
-    }
-
-    // asistentes
-    while (getline(fs, lin)) {
-        if (lin.empty()) continue;
-        stringstream ss(lin);
-        string nom, tipo; int id, edad, est, pag;
-        getline(ss, tok, ';'); id = stoi(tok);
-        getline(ss, nom, ';');
-        getline(ss, tok, ';'); edad = stoi(tok);
-        getline(ss, tipo, ';');
-        getline(ss, tok, ';'); est = stoi(tok);
-        getline(ss, tok, ';'); pag = stoi(tok);
-        asistentes.push_back(make_unique<Asistente>(id, nom, edad, tipo, est != 0, pag != 0));
-    }
-
-    // agenda
-    getline(fg, lin); // cabecera
-    stringstream hs(lin); int nd, ne;
-    getline(hs, tok, ';'); nd = stoi(tok);
-    getline(hs, tok, ';'); ne = stoi(tok);
-    dias = nd;
-    inicializarAgenda();
-
-    while (getline(fg, lin)) {
-        if (lin.empty()) continue;
-        stringstream ss(lin);
-        int d, idEsc, idArt, v;
-        getline(ss, tok, ';'); d = stoi(tok);
-        getline(ss, tok, ';'); idEsc = stoi(tok);
-        getline(ss, tok, ';'); idArt = stoi(tok);
-        getline(ss, tok, ';'); v = stoi(tok);
-        if (v != 0) {
-            Escenario* esc = nullptr;
-            Artista* art = nullptr;
-            for (auto& p : escenarios) if (p->getId() == idEsc) { esc = p.get(); break; }
-            for (auto& p : artistas)  if (p->getId() == idArt) { art = p.get(); break; }
-            if (esc && art) agenda[idxAgenda(d, idEsc)].asignar(d, esc, art);
+        // escenarios
+        try {
+            while (getline(fe, lin)) {
+                if (lin.empty()) continue;
+                stringstream ss(lin);
+                string nom; int id, af;
+                if (!getline(ss, tok, ';')) throw runtime_error("Escenario sin id");
+                id = stoi(tok);
+                if (!getline(ss, nom, ';')) throw runtime_error("Escenario sin nombre");
+                if (!getline(ss, tok, ';')) throw runtime_error("Escenario sin aforo");
+                af = stoi(tok);
+                escenarios.push_back(make_unique<Escenario>(id, nom, af));
+            }
         }
+        catch (const std::exception& e) {
+            throw runtime_error(string("Error al parsear escenarios: ") + e.what());
+        }
+
+        // artistas
+        try {
+            while (getline(fa, lin)) {
+                if (lin.empty()) continue;
+                stringstream ss(lin);
+                string nom, gen; int id, dem; double dur;
+                if (!getline(ss, tok, ';')) throw runtime_error("Artista sin id");
+                id = stoi(tok);
+                if (!getline(ss, nom, ';')) throw runtime_error("Artista sin nombre");
+                if (!getline(ss, gen, ';')) throw runtime_error("Artista sin genero");
+                if (!getline(ss, tok, ';')) throw runtime_error("Artista sin duracion");
+                dur = stod(tok);
+                if (!getline(ss, tok, ';')) throw runtime_error("Artista sin demanda");
+                dem = stoi(tok);
+                artistas.push_back(make_unique<Artista>(id, nom, gen, dur, dem));
+            }
+        }
+        catch (const std::exception& e) {
+            throw runtime_error(string("Error al parsear artistas: ") + e.what());
+        }
+
+        // asistentes
+        try {
+            while (getline(fs, lin)) {
+                if (lin.empty()) continue;
+                stringstream ss(lin);
+                string nom, tipo; int id, edad, est, pag;
+                if (!getline(ss, tok, ';')) throw runtime_error("Asistente sin id");
+                id = stoi(tok);
+                if (!getline(ss, nom, ';')) throw runtime_error("Asistente sin nombre");
+                if (!getline(ss, tok, ';')) throw runtime_error("Asistente sin edad");
+                edad = stoi(tok);
+                if (!getline(ss, tipo, ';')) throw runtime_error("Asistente sin tipo");
+                if (!getline(ss, tok, ';')) throw runtime_error("Asistente sin campo estudiante");
+                est = stoi(tok);
+                if (!getline(ss, tok, ';')) throw runtime_error("Asistente sin campo pagada");
+                pag = stoi(tok);
+                asistentes.push_back(make_unique<Asistente>(
+                    id, nom, edad, tipo, est != 0, pag != 0
+                ));
+            }
+        }
+        catch (const std::exception& e) {
+            throw runtime_error(string("Error al parsear asistentes: ") + e.what());
+        }
+
+        // agenda
+        if (!getline(fg, lin))
+            throw runtime_error("Fichero agenda sin cabecera");
+
+        stringstream hs(lin); int nd, ne;
+        if (!getline(hs, tok, ';')) throw runtime_error("Cabecera agenda sin dias");
+        nd = stoi(tok);
+        if (!getline(hs, tok, ';')) throw runtime_error("Cabecera agenda sin num escenarios");
+        ne = stoi(tok);
+
+        dias = nd;
+        inicializarAgenda();
+
+        try {
+            while (getline(fg, lin)) {
+                if (lin.empty()) continue;
+                stringstream ss(lin);
+                int d, idEsc, idArt, v;
+                if (!getline(ss, tok, ';')) throw runtime_error("Linea agenda sin dia");
+                d = stoi(tok);
+                if (!getline(ss, tok, ';')) throw runtime_error("Linea agenda sin idEsc");
+                idEsc = stoi(tok);
+                if (!getline(ss, tok, ';')) throw runtime_error("Linea agenda sin idArt");
+                idArt = stoi(tok);
+                if (!getline(ss, tok, ';')) throw runtime_error("Linea agenda sin flag valido");
+                v = stoi(tok);
+                if (v != 0) {
+                    Escenario* esc = nullptr;
+                    Artista* art = nullptr;
+                    for (auto& p : escenarios) if (p->getId() == idEsc) { esc = p.get(); break; }
+                    for (auto& p : artistas)  if (p->getId() == idArt) { art = p.get(); break; }
+                    if (esc && art) {
+                        
+                        agenda[idxAgenda(d, idEsc)].asignar(d, esc, art);
+                    }
+                }
+            }
+        }
+        catch (const std::exception& e) {
+            throw runtime_error(string("Error al parsear agenda: ") + e.what());
+        }
+
+        cout << "Datos cargados correctamente desde carpeta: " << dir << endl;
+        return true;
     }
-
-    cout << "Datos cargados correctamente desde carpeta: " << dir << endl;
-    return true;
+    catch (const std::exception& ex) {
+        cerr << "Error al cargar datos del festival: " << ex.what() << '\n';
+        throw; // se relanza para que main pueda gestionarlo
+    }
 }
-
