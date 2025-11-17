@@ -4,6 +4,8 @@
 #include <sstream>
 #include <memory>
 #include <algorithm>
+#include <filesystem>
+
 using namespace std;
 
 // Funcion libre para componer rutas de ficheros
@@ -188,6 +190,8 @@ void GestorFestival::listarAsistentes() const {
 
 // ---------- persistencia (metodo para guardar los datos) ----------
 bool GestorFestival::guardar(const string& dir) const {
+    filesystem::create_directories(dir);
+
     ofstream fa(joinPath(dir, "artistas.txt"));
     ofstream fe(joinPath(dir, "escenarios.txt"));
     ofstream fs(joinPath(dir, "asistentes.txt"));
@@ -237,6 +241,8 @@ bool GestorFestival::guardar(const string& dir) const {
 
 // Metodo encargado de cargar los datos
 bool GestorFestival::cargar(const string& dir) {
+    filesystem::create_directories(dir);
+
     ifstream fa(joinPath(dir, "artistas.txt"));
     ifstream fe(joinPath(dir, "escenarios.txt"));
     ifstream fs(joinPath(dir, "asistentes.txt"));
