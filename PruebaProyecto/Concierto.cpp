@@ -17,7 +17,7 @@ Concierto::Concierto(int d, const Escenario* esc, const Artista* art)
     }
 }
 
-// Asignar datos a un concierto existente
+// Metodo asignar datos a un concierto existente
 void Concierto::asignar(int nuevoDia, const Escenario* esc, const Artista* art) {
     dia = nuevoDia;
     escenario = esc;
@@ -25,7 +25,7 @@ void Concierto::asignar(int nuevoDia, const Escenario* esc, const Artista* art) 
     valido = (esc != nullptr && art != nullptr && nuevoDia >= 0);
 }
 
-// Limpiar el concierto (deja libre)
+// Metodo limpiar el concierto (deja libre)
 void Concierto::limpiar() {
     dia = -1;
     escenario = nullptr;
@@ -33,7 +33,7 @@ void Concierto::limpiar() {
     valido = false;
 }
 
-// Mostrar informacion por consola
+// Metodo mostrar informacion por consola
 void Concierto::mostrarInfo() const {
     cout << "Concierto: ";
     if (!valido) {

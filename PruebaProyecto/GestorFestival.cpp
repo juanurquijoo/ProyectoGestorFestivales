@@ -2,10 +2,11 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
-#include <algorithm>
 #include <memory>
+#include <algorithm>
 using namespace std;
 
+// Funcion libre para componer rutas de ficheros
 static string joinPath(const string& dir, const string& name) {
 #ifdef _WIN32
     if (dir.empty() || dir == ".") return name;
@@ -16,10 +17,12 @@ static string joinPath(const string& dir, const string& name) {
 #endif
 }
 
+// Constructor
 GestorFestival::GestorFestival(string n, int d)
     : nombre(std::move(n)), dias(d > 0 ? d : DIAS_DEFECTO) {
 }
 
+// Getters
 const string& GestorFestival::getNombre() const { return nombre; }
 int  GestorFestival::getDias() const { return dias; }
 int  GestorFestival::getNumEscenarios() const { return static_cast<int>(escenarios.size()); }
@@ -42,46 +45,57 @@ void GestorFestival::inicializarAgenda() {
             agenda[idxAgenda(d, e)] = Concierto();
 }
 
-// ---------- altas ----------
+// ---------- Metodo añadir artistas ----------
 bool GestorFestival::anadirArtista(const Artista& a) {
     for (auto& ptr : artistas) if (ptr->getId() == a.getId()) return false;
     artistas.push_back(make_unique<Artista>(a));
     return true;
 }
 
+// ---------- Metodo añadir escenario ----------
 bool GestorFestival::anadirEscenario(const Escenario& e) {
     for (auto& ptr : escenarios) if (ptr->getId() == e.getId()) return false;
     escenarios.push_back(make_unique<Escenario>(e));
     return true;
 }
 
+// ---------- Metodo registrar asistente ----------
 bool GestorFestival::registrarAsistente(const Asistente& a) {
     for (auto& ptr : asistentes) if (ptr->getId() == a.getId()) return false;
     asistentes.push_back(make_unique<Asistente>(a));
     return true;
 }
 
-// ---------- busquedas (sobrecarga + wrappers) ----------
+// ---------- Metodo buscar artista por id (sobrecarga + wrappers) ----------
 Artista* GestorFestival::buscarArtista(int id) {
     for (auto& p : artistas) if (p->getId() == id) return p.get();
     return nullptr;
 }
+
+// ---------- Metodo buscar artista por nombre (sobrecarga + wrappers) ----------
 const Artista* GestorFestival::buscarArtista(const std::string& nombre) const {
     for (const auto& p : artistas) if (p->getNombre() == nombre) return p.get();
     return nullptr;
 }
+
+// Llamada al metodo
 Artista* GestorFestival::buscarArtistaPorId(int id) {  // wrapper para codigo existente
     return buscarArtista(id);
 }
 
+// ---------- Metodo buscar escenario por id (sobrecarga + wrappers) ----------
 Escenario* GestorFestival::buscarEscenario(int id) {
     for (auto& p : escenarios) if (p->getId() == id) return p.get();
     return nullptr;
 }
+
+// ---------- Metodo buscar escenario por nombre (sobrecarga + wrappers) ----------
 const Escenario* GestorFestival::buscarEscenario(const std::string& nombre) const {
     for (const auto& p : escenarios) if (p->getNombre() == nombre) return p.get();
     return nullptr;
 }
+
+// Llamada al metodo
 Escenario* GestorFestival::buscarEscenarioPorId(int id) { // wrapper
     return buscarEscenario(id);
 }
@@ -91,6 +105,7 @@ int GestorFestival::idxAgenda(int d, int idEscenario) const {
     return d * getNumEscenarios() + idEscenario;
 }
 
+// Metodo encargado de comprobar si un artista ya tiene concierto ese dia
 bool GestorFestival::artistaYaProgramadoEnDia(int idArtista, int d) const {
     if (d < 0 || d >= dias) return false;
     for (int e = 0; e < getNumEscenarios(); ++e) {
@@ -101,6 +116,7 @@ bool GestorFestival::artistaYaProgramadoEnDia(int idArtista, int d) const {
     return false;
 }
 
+// Metodo encargado de asignar un concierto
 bool GestorFestival::asignarConcierto(int d, int idEsc, int idArt) {
     if (d < 0 || d >= dias) { cout << "dia invalido\n"; return false; }
     Escenario* esc = buscarEscenarioPorId(idEsc);
@@ -127,7 +143,7 @@ bool GestorFestival::asignarConcierto(int d, int idEsc, int idArt) {
     return true;
 }
 
-// ---------- listados ----------
+// ---------- listados (muestra en pantalla la agenda de un dia ----------
 void GestorFestival::listarAgendaDia(int d) const {
     if (d < 0 || d >= dias) { cout << "dia invalido\n"; return; }
     cout << "--- agenda dia " << d << " ---\n";
@@ -144,20 +160,24 @@ void GestorFestival::listarAgendaDia(int d) const {
     }
 }
 
+// LLamada al metodo
 void GestorFestival::listarAgendaCompleta() const {
     for (int d = 0; d < dias; ++d) listarAgendaDia(d);
 }
 
+// Recorre los punteros de artista y llama al metodo mostrar informacion
 void GestorFestival::listarArtistas() const {
     cout << "--- artistas ---\n";
     for (const auto& p : artistas) p->mostrarInfo();
 }
 
+// Recorre los punteros de escenario y llama al metodo mostrar informacion
 void GestorFestival::listarEscenarios() const {
     cout << "--- escenarios ---\n";
     for (const auto& p : escenarios) p->mostrarInfo();
 }
 
+// Recorre los punteros de asistentes y llama al metodo mostrar informacion
 void GestorFestival::listarAsistentes() const {
     cout << "--- asistentes ---\n";
     for (const auto& p : asistentes) {
@@ -166,7 +186,7 @@ void GestorFestival::listarAsistentes() const {
     }
 }
 
-// ---------- persistencia ----------
+// ---------- persistencia (metodo para guardar los datos) ----------
 bool GestorFestival::guardar(const string& dir) const {
     ofstream fa(joinPath(dir, "artistas.txt"));
     ofstream fe(joinPath(dir, "escenarios.txt"));
@@ -215,6 +235,7 @@ bool GestorFestival::guardar(const string& dir) const {
     return true;
 }
 
+// Metodo encargado de cargar los datos
 bool GestorFestival::cargar(const string& dir) {
     ifstream fa(joinPath(dir, "artistas.txt"));
     ifstream fe(joinPath(dir, "escenarios.txt"));
