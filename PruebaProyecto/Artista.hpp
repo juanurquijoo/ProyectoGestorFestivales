@@ -5,12 +5,12 @@ class Artista {
 private:
     int id;
     std::string nombre;
-    std::string genero;     // si luego quieres enum, cambiamos
+    std::string genero;     
     double duracionMin;
     int demandaEstimada;
 
 public:
-    // ctor
+    // Constructor
     Artista(int id, std::string nombre, std::string genero, double duracion, int demanda);
 
     // interface
